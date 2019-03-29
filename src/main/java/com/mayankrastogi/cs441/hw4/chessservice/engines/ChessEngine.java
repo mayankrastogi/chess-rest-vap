@@ -14,6 +14,8 @@ import java.util.Stack;
 
 public interface ChessEngine {
 
+    String AI_PLAYER_NAME = "Chess AI";
+
     Map<String, ChessEngine> GAME_SESSIONS = new HashMap<>();
 
     static ChessEngine getInstance(String gameID) {

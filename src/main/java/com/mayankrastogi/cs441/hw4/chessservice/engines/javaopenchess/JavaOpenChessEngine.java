@@ -34,7 +34,6 @@ import java.util.UUID;
 @Service
 public class JavaOpenChessEngine implements ChessEngine {
 
-    private static final String SERVER_PLAYER_NAME = "Chess AI";
     private static final Logger LOG = LoggerFactory.getLogger(JavaOpenChessEngine.class);
 
     private Game game;
@@ -61,13 +60,13 @@ public class JavaOpenChessEngine implements ChessEngine {
             whitePlayerName = playerName;
             whitePlayerType = PlayerType.LOCAL_USER;
 
-            blackPlayerName = SERVER_PLAYER_NAME;
+            blackPlayerName = AI_PLAYER_NAME;
             blackPlayerType = PlayerType.COMPUTER;
         } else {
             blackPlayerName = playerName;
             blackPlayerType = PlayerType.LOCAL_USER;
 
-            whitePlayerName = SERVER_PLAYER_NAME;
+            whitePlayerName = AI_PLAYER_NAME;
             whitePlayerType = PlayerType.COMPUTER;
         }
 
@@ -117,6 +116,8 @@ public class JavaOpenChessEngine implements ChessEngine {
 
     @Override
     public ChessMove getNextMove() throws GameEndedException {
+        if(game == null || hasGameEnded()) throw new GameEndedException();
+
         Move computedMove = game.getAi().getMove(game, game.getMoves().getLastMoveFromHistory());
         return getChessMoveFromMove(computedMove);
     }

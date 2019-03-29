@@ -20,4 +20,8 @@ dependencies {
 
     // Include Jar files from libs folder (for including Java Open Chess library)
     compile fileTree(dir: 'lib', include: '*.jar')
+
+    // Retrofit - for writing a REST client to make two VAPs play with each other
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-jackson:2.5.0'
 }

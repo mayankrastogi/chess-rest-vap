@@ -17,4 +17,7 @@ dependencies {
     // SpringBoot
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // Include Jar files from libs folder (for including Java Open Chess library)
+    compile fileTree(dir: 'lib', include: '*.jar')
 }

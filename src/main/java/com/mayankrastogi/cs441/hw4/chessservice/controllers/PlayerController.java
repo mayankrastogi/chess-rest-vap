@@ -3,6 +3,7 @@ package com.mayankrastogi.cs441.hw4.chessservice.controllers;
 import com.mayankrastogi.cs441.hw4.chessservice.core.ChessMove;
 import com.mayankrastogi.cs441.hw4.chessservice.core.PlayerColor;
 import com.mayankrastogi.cs441.hw4.chessservice.core.dto.ChessMoveDTO;
+import com.mayankrastogi.cs441.hw4.chessservice.core.dto.ChessPlayerDTO;
 import com.mayankrastogi.cs441.hw4.chessservice.engines.ChessEngine;
 import com.mayankrastogi.cs441.hw4.chessservice.restclients.ChessAPI;
 import org.slf4j.Logger;
@@ -15,8 +16,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-import java.io.IOException;
-import java.util.HashMap;
+import static com.mayankrastogi.cs441.hw4.chessservice.engines.ChessEngine.AI_PLAYER_NAME;
 
 @RestController
 public class PlayerController {
@@ -31,7 +31,7 @@ public class PlayerController {
     }
 
     @PostMapping("/play")
-    public HashMap<String, Object> play(
+    public ChessPlayerDTO play(
             @RequestParam String serverURL,
             @RequestParam int serverPlayerAILevel,
             @RequestParam String playerName,
@@ -49,20 +49,33 @@ public class PlayerController {
 
         ChessAPI chessAPI = retrofit.create(ChessAPI.class);
 
+        // The server player's color is opposite of our color
+        PlayerColor serverPlayerColor = playerColor == PlayerColor.WHITE ? PlayerColor.BLACK : PlayerColor.WHITE;
+
+        ChessPlayerDTO response = new ChessPlayerDTO();
+        response.playerName = playerName;
+        response.playerColor = playerColor;
+        response.playerAILevel = playerAILevel;
+        response.serverPlayerName = AI_PLAYER_NAME;
+        response.serverPlayerColor = serverPlayerColor;
+        response.serverPlayerAILevel = serverPlayerAILevel;
+        response.serverURL = serverURL;
+
         try {
             Response<ChessMoveDTO> newGameResponse = chessAPI.newGame(playerName, playerColor, serverPlayerAILevel)
                     .execute();
+            LOG.debug("Response received from newGame: " + newGameResponse);
 
             if (newGameResponse.isSuccessful()) {
                 ChessMoveDTO newGameDTO = newGameResponse.body();
 
-                // The server player's color is opposite of our color
-                PlayerColor serverPlayer = playerColor == PlayerColor.WHITE ? PlayerColor.BLACK : PlayerColor.WHITE;
+                // Update our response
+                response.outcome = newGameDTO.status;
 
                 // Create a local copy of the chess game
                 ChessEngine clientGame = chessEngine.newGame(
                         "Server Player",
-                        serverPlayer,
+                        serverPlayerColor,
                         playerAILevel
                 );
 
@@ -75,8 +88,10 @@ public class PlayerController {
                     clientGame.makeMove(clientGame.getNextMove());
                 }
 
+                boolean hasGameEnded = newGameDTO.status.hasGameEnded;
+
                 // Keep playing until the game ends
-                while (!clientGame.hasGameEnded()) {
+                while (!hasGameEnded) {
                     // The last move in local game will be our move, based on the last move made by the server
                     ChessMove nextMove = clientGame.getMoveHistory().peek();
 
@@ -85,22 +100,39 @@ public class PlayerController {
 
                     if (makeMoveResponse.isSuccessful()) {
                         ChessMoveDTO makeMoveDTO = makeMoveResponse.body();
+                        LOG.debug("Response received from makeMove: " + makeMoveResponse);
 
-                        // Make the move made by the server on our local game
-                        clientGame.makeMove(makeMoveDTO.serverMove);
+                        // If the game has ended, we do not need to make a move
+                        if(makeMoveDTO.status.hasGameEnded) {
+                            hasGameEnded = true;
+                        }
+                        else {
+                            // Make the move made by the server on our local game
+                            clientGame.makeMove(makeMoveDTO.serverMove);
+                        }
+
+                        // Update our response
+                        response.outcome = makeMoveDTO.status;
                     } else {
-                        LOG.error("Error making a move: " + makeMoveResponse.errorBody().string());
-                        break;
+                        hasGameEnded = true;
+
+                        String errorMessage = "Error making a move: " + makeMoveResponse.errorBody().string();
+                        LOG.error(errorMessage);
+                        throw new RuntimeException(errorMessage);
                     }
                 }
                 LOG.info("Game Ended!");
             } else {
-                LOG.error("Error creating new game: " + newGameResponse.errorBody().string());
+                String errorMessage = "Error creating new game: " + newGameResponse.errorBody().string();
+                LOG.error(errorMessage);
+                throw new RuntimeException(errorMessage);
             }
-        } catch (IOException e) {
-            LOG.error("An error occured while playing the game with chess service at " + serverURL, e);
+        } catch (Exception e) {
+            String errorMessage = "An error occurred while playing the game with chess service at " + serverURL;
+            LOG.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
         }
 
-        return null;
+        return response;
     }
 }

@@ -6,6 +6,7 @@ import com.mayankrastogi.cs441.hw4.chessservice.core.TransferFormat;
 import com.mayankrastogi.cs441.hw4.chessservice.core.dto.ChessMoveDTO;
 import com.mayankrastogi.cs441.hw4.chessservice.core.dto.ViewStateDTO;
 import com.mayankrastogi.cs441.hw4.chessservice.engines.ChessEngine;
+import com.mayankrastogi.cs441.hw4.chessservice.utils.ChessUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,6 @@ public class ChessController {
             newGame.makeMove(newGame.getNextMove());
         }
 
-        response.success = true;
         response.gameID = newGame.getGameID();
         response.clientMove = null;
         try {
@@ -67,7 +67,7 @@ public class ChessController {
         } catch (EmptyStackException e) {
             response.serverMove = null;
         }
-        response.fen = newGame.exportGame(TransferFormat.FEN);
+        response.status = ChessUtils.getGameState(newGame.getGameID());
 
         return response;
     }
@@ -87,9 +87,7 @@ public class ChessController {
         response.gameID = gameID;
         response.clientMove = move;
         response.serverMove = chessEngine.getMoveHistory().peek();
-
-        response.success = true;
-        response.fen = chessEngine.exportGame(TransferFormat.FEN);
+        response.status = ChessUtils.getGameState(gameID);
 
         return response;
     }
@@ -98,17 +96,6 @@ public class ChessController {
     public ViewStateDTO getState(@PathVariable String gameID) {
 
         LOG.trace(String.format("viewState(gameID=%s)", gameID));
-
-        ChessEngine chessEngine = ChessEngine.getInstance(gameID);
-
-        ViewStateDTO response = new ViewStateDTO();
-        response.success = true;
-        response.hasGameEnded = chessEngine.hasGameEnded();
-        response.fen = chessEngine.exportGame(TransferFormat.FEN);
-        response.pgn = chessEngine.exportGame(TransferFormat.PGN);
-        response.status = chessEngine.getState();
-        response.winner = chessEngine.getWinner();
-
-        return response;
+        return ChessUtils.getGameState(gameID);
     }
 }

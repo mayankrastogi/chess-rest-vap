@@ -130,7 +130,7 @@ public class JavaOpenChessEngine implements ChessEngine {
                 game.setSettings(settings);
                 game.setAi(AIFactory.getAI(aiLevel));
             }
-        } catch (ReadGameError e) {
+        } catch (ReadGameError | NullPointerException e) {
             LOG.error("Error loading game: ", e);
             throw new GameLoadException(GameLoadException.DEFAULT_MESSAGE, e);
         }

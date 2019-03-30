@@ -1,5 +1,8 @@
 package com.mayankrastogi.cs441.hw4.chessservice.core.exceptions;
 
+/**
+ * Indicates that there was a problem while loading the game.
+ */
 public class GameLoadException extends RuntimeException {
 
     public static final String DEFAULT_MESSAGE = "The game could not be loaded using the specified input data.";

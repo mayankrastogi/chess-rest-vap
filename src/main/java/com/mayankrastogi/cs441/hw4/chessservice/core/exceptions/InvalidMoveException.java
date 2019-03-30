@@ -1,5 +1,8 @@
 package com.mayankrastogi.cs441.hw4.chessservice.core.exceptions;
 
+/**
+ * Indicates that a move requested to be made is invalid for the current state of the game.
+ */
 public class InvalidMoveException extends RuntimeException {
 
     public static final String DEFAULT_MESSAGE = "The specified move is not a valid move.";

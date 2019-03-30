@@ -1,5 +1,8 @@
 package com.mayankrastogi.cs441.hw4.chessservice.core.exceptions;
 
+/**
+ * Indicates that an operation could not be performed since the chess game already was over.
+ */
 public class GameEndedException extends RuntimeException {
 
     public static final String DEFAULT_MESSAGE = "The chess game is over and thus no more moves can be made.";

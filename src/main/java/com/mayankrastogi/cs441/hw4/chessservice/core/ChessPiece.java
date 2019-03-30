@@ -1,13 +1,15 @@
 package com.mayankrastogi.cs441.hw4.chessservice.core;
 
+/**
+ * Valid names of pieces on a chess board.
+ */
 public enum ChessPiece {
     BISHOP("bishop", "B"),
     KNIGHT("knight", "N"),
     ROOK("rook", "R"),
     QUEEN("queen", "Q"),
     KING("king", "K"),
-    PAWN("pawn", "P")
-    ;
+    PAWN("pawn", "P");
 
     private String name;
     private String symbol;

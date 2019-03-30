@@ -18,6 +18,9 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import static com.mayankrastogi.cs441.hw4.chessservice.engines.ChessEngine.AI_PLAYER_NAME;
 
+/**
+ * Exposes an end-point to play chess with another instance of this chess service.
+ */
 @RestController
 public class PlayerController {
 
@@ -25,11 +28,29 @@ public class PlayerController {
 
     private ChessEngine chessEngine;
 
+    /**
+     * Setter for injecting the chess engine.
+     *
+     * @param chessEngine The chess engine.
+     */
     @Autowired
     public void setChessEngine(ChessEngine chessEngine) {
         this.chessEngine = chessEngine;
     }
 
+    /**
+     * Play AI vs AI chess with another instance of this chess service.
+     * <p>
+     * WARNING: Do NOT use the same AI level for both the server and the player, otherwise the game will go on forever.
+     * There is no limit on the maximum number of moves as of now.
+     *
+     * @param serverURL           URL of the chess service.
+     * @param serverPlayerAILevel AI level of the server player.
+     * @param playerName          The name by which this AI player should be identified.
+     * @param playerColor         The color to use for this AI player.
+     * @param playerAILevel       The AI level of this player.
+     * @return The results of the AI vs AI chess game.
+     */
     @PostMapping("/play")
     public ChessPlayerDTO play(
             @RequestParam String serverURL,
@@ -42,11 +63,13 @@ public class PlayerController {
                 "play(serverURL=%s, serverPlayerAILevel=%s, playerName=%s, playerColor=%s, playerAILevel=%s)",
                 serverURL, serverPlayerAILevel, playerName, playerColor, playerAILevel));
 
+        // Configure retrofit
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(serverURL)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
+        // Generate a REST client using the ChessAPI interface
         ChessAPI chessAPI = retrofit.create(ChessAPI.class);
 
         // The server player's color is opposite of our color
@@ -62,6 +85,7 @@ public class PlayerController {
         response.serverURL = serverURL;
 
         try {
+            // Make the request to start a new game with the server
             Response<ChessMoveDTO> newGameResponse = chessAPI.newGame(playerName, playerColor, serverPlayerAILevel)
                     .execute();
             LOG.debug("Response received from newGame: " + newGameResponse);
@@ -103,10 +127,9 @@ public class PlayerController {
                         LOG.debug("Response received from makeMove: " + makeMoveResponse);
 
                         // If the game has ended, we do not need to make a move
-                        if(makeMoveDTO.status.hasGameEnded) {
+                        if (makeMoveDTO.status.hasGameEnded) {
                             hasGameEnded = true;
-                        }
-                        else {
+                        } else {
                             // Make the move made by the server on our local game
                             clientGame.makeMove(makeMoveDTO.serverMove);
                         }

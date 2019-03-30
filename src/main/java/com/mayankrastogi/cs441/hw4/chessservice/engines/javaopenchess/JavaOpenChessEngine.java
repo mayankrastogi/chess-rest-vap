@@ -9,11 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.annotation.RequestScope;
 import pl.art.lach.mateusz.javaopenchess.core.Colors;
 import pl.art.lach.mateusz.javaopenchess.core.Game;
 import pl.art.lach.mateusz.javaopenchess.core.Square;
 import pl.art.lach.mateusz.javaopenchess.core.ai.AIFactory;
+import pl.art.lach.mateusz.javaopenchess.core.ai.joc_ai.Level1;
 import pl.art.lach.mateusz.javaopenchess.core.data_transfer.DataExporter;
 import pl.art.lach.mateusz.javaopenchess.core.data_transfer.DataImporter;
 import pl.art.lach.mateusz.javaopenchess.core.data_transfer.implementations.FenNotation;
@@ -30,7 +30,11 @@ import pl.art.lach.mateusz.javaopenchess.utils.Settings;
 import java.util.Stack;
 import java.util.UUID;
 
-@RequestScope
+/**
+ * Wrapper around the Java Open Chess Engine (jChess) that implements the {@link ChessEngine} interface.
+ * <p>
+ * This is a Spring service that will be injected into the controllers.
+ */
 @Service
 public class JavaOpenChessEngine implements ChessEngine {
 
@@ -41,6 +45,9 @@ public class JavaOpenChessEngine implements ChessEngine {
     private String winner;
     private GameState state;
 
+    /**
+     * The default constructor that will be used to inject a dummy instance into the controllers.
+     */
     @Autowired
     public JavaOpenChessEngine() {
         game = null;
@@ -50,8 +57,10 @@ public class JavaOpenChessEngine implements ChessEngine {
     }
 
     public JavaOpenChessEngine(String playerName, PlayerColor playerColor, int aiLevel) {
+        // Invoke the default constructor
         this();
 
+        // Set up the attributes of the two players
         String whitePlayerName, blackPlayerName;
         PlayerType whitePlayerType, blackPlayerType;
         Player whitePlayer, blackPlayer;
@@ -70,19 +79,23 @@ public class JavaOpenChessEngine implements ChessEngine {
             whitePlayerType = PlayerType.COMPUTER;
         }
 
+        // Create the two players
         whitePlayer = new ChessPlayer(whitePlayerName, Colors.WHITE, whitePlayerType);
         blackPlayer = new ChessPlayer(blackPlayerName, Colors.BLACK, blackPlayerType);
 
+        // Configure the settings
         Settings settings = new Settings(whitePlayer, blackPlayer);
         settings.setGameMode(GameModes.NEW_GAME);
         settings.setGameType(GameTypes.LOCAL);
 
+        // Create a new game
         game = new Game();
         game.setSettings(settings);
         game.getChessboard().setPieces4NewGame(whitePlayer, blackPlayer);
         game.setActivePlayer(whitePlayer);
         game.setAi(AIFactory.getAI(aiLevel));
 
+        // Add the new game instance to the sessions mapping
         GAME_SESSIONS.put(getGameID(), this);
     }
 
@@ -99,9 +112,24 @@ public class JavaOpenChessEngine implements ChessEngine {
     @Override
     public void loadGame(String data, TransferFormat format) throws GameLoadException {
         try {
+            Settings settings = null;
+            int aiLevel = 2;
+
+            // Copy the settings of the current game
+            if (game != null) {
+                settings = game.getSettings();
+                aiLevel = game.getAi() instanceof Level1 ? 1 : 2;
+            }
+
+            // Load the supplied game into the current game
             DataImporter importer = format == TransferFormat.FEN ? new FenNotation() : new PGNNotation();
             game = importer.importData(data);
-            game.setAi(AIFactory.getAI(2));
+
+            // Restore the settings of the current game
+            if (settings != null) {
+                game.setSettings(settings);
+                game.setAi(AIFactory.getAI(aiLevel));
+            }
         } catch (ReadGameError e) {
             LOG.error("Error loading game: ", e);
             throw new GameLoadException(GameLoadException.DEFAULT_MESSAGE, e);
@@ -116,7 +144,7 @@ public class JavaOpenChessEngine implements ChessEngine {
 
     @Override
     public ChessMove getNextMove() throws GameEndedException {
-        if(game == null || hasGameEnded()) throw new GameEndedException();
+        if (game == null || hasGameEnded()) throw new GameEndedException();
 
         Move computedMove = game.getAi().getMove(game, game.getMoves().getLastMoveFromHistory());
         return getChessMoveFromMove(computedMove);
@@ -124,25 +152,33 @@ public class JavaOpenChessEngine implements ChessEngine {
 
     @Override
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        // Set the state as thinking
         state = GameState.THINKING;
 
+        // Get the squares described in the move
         BoardSquare fromSquare = new BoardSquare(move.fromSquare);
         BoardSquare toSquare = new BoardSquare(move.toSquare);
 
+        // Select the starting square
         selectSquare(game.getChessboard().getSquare(fromSquare.x, fromSquare.y));
 
-        Square sq = game.getChessboard().getSquare(toSquare.x, toSquare.y);
+        // Get the end square
+        Square endSquare = game.getChessboard().getSquare(toSquare.x, toSquare.y);
 
-        if (canInvokeMoveAction(sq)) //move
+        // Check if the move is valid
+        if (canInvokeMoveAction(endSquare)) //move
         {
-            game.getChessboard().move(game.getChessboard().getActiveSquare(), sq);
+            // Make the move and unselect the square
+            game.getChessboard().move(game.getChessboard().getActiveSquare(), endSquare);
             game.getChessboard().unselect();
 
-            //switch player
+            // Switch the player
             game.nextMove();
 
+            // Test if the game has ended
             testForEndOfGame();
 
+            // Make the next move using the AI if it should make the next move
             if (canDoComputerMove()) {
                 game.doComputerMove();
                 testForEndOfGame();
@@ -188,7 +224,6 @@ public class JavaOpenChessEngine implements ChessEngine {
                 moveStack.push(getChessMoveFromMove(move));
             }
         }
-
         return moveStack;
     }
 

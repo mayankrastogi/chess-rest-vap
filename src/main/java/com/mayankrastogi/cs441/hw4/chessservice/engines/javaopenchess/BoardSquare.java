@@ -2,6 +2,9 @@ package com.mayankrastogi.cs441.hw4.chessservice.engines.javaopenchess;
 
 import pl.art.lach.mateusz.javaopenchess.core.Squares;
 
+/**
+ * Helper class to get the {@link Squares} denoted by the current square in the chess board.
+ */
 public class BoardSquare {
 
     public Squares x;
@@ -12,6 +15,11 @@ public class BoardSquare {
         this.y = y;
     }
 
+    /**
+     * Constructs a {@link BoardSquare} from the algebraic notation of a square.
+     *
+     * @param squareNotation The algebraic notation of a square.
+     */
     public BoardSquare(String squareNotation) {
         StringBuilder strX = new StringBuilder("SQ_");
         StringBuilder strY = new StringBuilder("SQ_");

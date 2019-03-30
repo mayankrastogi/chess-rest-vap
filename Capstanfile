@@ -1,0 +1,18 @@
+# ======================================================================================================================
+# ------------------------------------------------- IMPORTANT NOTE -----------------------------------------------------
+# ======================================================================================================================
+# The application needs an osv-openjdk8 base image built from the latest osv source code to run properly.
+#
+# Run osv-base-images/install-images.sh before doing a capstan build. That script will decompress the custom built base
+# images in osv-base-images and copy them to ~/.capstan/repositories/mayankrastogi
+#
+# ======================================================================================================================
+
+base: mayankrastogi/osv-openjdk8
+
+cmdline: /java.so -jar /usr/app/chessservice.jar
+
+build: ./gradlew bootJar
+
+files:
+  /usr/app/chessservice.jar: build/libs/chessservice-0.0.1-SNAPSHOT.jar

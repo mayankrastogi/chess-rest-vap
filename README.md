@@ -69,7 +69,7 @@ docker pull mayankrastogi/chessservice:0.0.1-SNAPSHOT
 
 1. Log into a Linux/Mac machine that has QEMU and KVM installed and configured
 2. Open terminal and browse to the project directory
-3. Install `capstan` if you don't have it already
+3. Install [Capstan](https://github.com/cloudius-systems/capstan) if you don't have it already
 
     ```
     curl https://raw.githubusercontent.com/cloudius-systems/capstan/master/scripts/download | bash
@@ -99,7 +99,40 @@ docker pull mayankrastogi/chessservice:0.0.1-SNAPSHOT
 
 #### Containerizing the Chess Service using Docker and publishing it on Docker Hub
 
-// TODO
+1. Ensure that docker is installed and running
+2. Open Command Prompt or Terminal from where you can issue docker commands and browse to the project directory
+3. Build the docker image
+
+    ```
+    docker build -t chessservice .
+    ```
+
+4. Run the docker image and forward port `8080` of the container to port `8080` of the host
+
+    ```
+    docker run -p 8080:8080 chessservice
+    ```
+
+5. Our Spring Boot application should have started. Test it by making a request to start a new game by sending a `POST` request to `localhost:8080/chess/new`. Check the [API specification](#api-specification) section to find out the set of parameters to pass
+
+6. Stop the application by pressing `Ctrl` + `C`
+7. Login to your docker hub account. Enter your credentials when prompted:
+
+    ```
+    docker login
+    ```
+
+8. Tag the docker image
+
+    ```
+    docker tag chessservice mayankrastogi/chessservice:0.0.1-SNAPSHOT
+    ```    
+
+9. Push the image to the Docker Hub repository
+
+    ```
+    docker push mayankrastogi/chessservice
+    ```
 
 ### AWS Deployment
 

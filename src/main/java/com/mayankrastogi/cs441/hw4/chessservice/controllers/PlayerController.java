@@ -49,6 +49,7 @@ public class PlayerController {
      * @param playerName          The name by which this AI player should be identified.
      * @param playerColor         The color to use for this AI player.
      * @param playerAILevel       The AI level of this player.
+     * @param maxMoves            Maximum number of moves before the game is considered to be over. Default: 100.
      * @return The results of the AI vs AI chess game.
      */
     @PostMapping("/play")
@@ -57,7 +58,8 @@ public class PlayerController {
             @RequestParam int serverPlayerAILevel,
             @RequestParam String playerName,
             @RequestParam PlayerColor playerColor,
-            @RequestParam int playerAILevel) {
+            @RequestParam int playerAILevel,
+            @RequestParam(defaultValue = "100") int maxMoves) {
 
         LOG.trace(String.format(
                 "play(serverURL=%s, serverPlayerAILevel=%s, playerName=%s, playerColor=%s, playerAILevel=%s)",
@@ -103,6 +105,9 @@ public class PlayerController {
                         playerAILevel
                 );
 
+                // Track number of moves made
+                int numberOfMoves = 0;
+
                 // If the server responded with first move, make that move in our local game
                 if (newGameDTO.serverMove != null) {
                     clientGame.makeMove(newGameDTO.serverMove);
@@ -115,7 +120,7 @@ public class PlayerController {
                 boolean hasGameEnded = newGameDTO.status.hasGameEnded;
 
                 // Keep playing until the game ends
-                while (!hasGameEnded) {
+                while (!hasGameEnded && numberOfMoves < maxMoves) {
                     // The last move in local game will be our move, based on the last move made by the server
                     ChessMove nextMove = clientGame.getMoveHistory().peek();
 
@@ -133,6 +138,9 @@ public class PlayerController {
                             // Make the move made by the server on our local game
                             clientGame.makeMove(makeMoveDTO.serverMove);
                         }
+                        // Update moves counter
+                        numberOfMoves = makeMoveDTO.status.moves.size() / 2;
+                        LOG.debug("Number of moves: " + numberOfMoves);
 
                         // Update our response
                         response.outcome = makeMoveDTO.status;

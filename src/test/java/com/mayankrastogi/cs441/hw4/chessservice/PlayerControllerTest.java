@@ -14,7 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -43,9 +45,11 @@ public class PlayerControllerTest {
                     .param("playerName", "Test Player")
                     .param("playerColor", PlayerColor.BLACK.toString())
                     .param("playerAILevel", "2")
+                    .param("maxMoves", "50")
                     .accept(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.outcome.moves.length()", greaterThanOrEqualTo(50)));
     }
 
     @Test
@@ -56,8 +60,10 @@ public class PlayerControllerTest {
                     .param("playerName", "Test Player")
                     .param("playerColor", PlayerColor.WHITE.toString())
                     .param("playerAILevel", "2")
+                    .param("maxMoves", "50")
                     .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.outcome.moves.length()", greaterThanOrEqualTo(50)));
     }
 
     @Test

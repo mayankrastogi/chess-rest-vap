@@ -144,4 +144,63 @@ Watch this [video on YouTube](https://youtu.be/lqg4FtTALQ4) for details on how t
 
 #### Deploying docker container on AWS EC2
 
-// TODO
+1. Log in to your AWS Console
+2. Search for **"EC2"** from the *Find Services* search box
+3. Click on **Launch Instance**
+
+    ![01](https://mrasto3.people.uic.edu/cs441/hw4/01.PNG)
+
+4. Select ***Amazon Linux AMI 2018.03.0 (HVM), SSD Volume Type** - ami-0cd3dfa4e37921605*
+
+    ![02](https://mrasto3.people.uic.edu/cs441/hw4/02.PNG)
+    
+5. Choose the **t2.micro** as your instance type and click **Next: Configure Instance Details**
+
+    ![03](https://mrasto3.people.uic.edu/cs441/hw4/03.PNG)
+
+6. Keep the default settings on this page and select **Next: Add Storage**
+7. Keep the default settings on this page and select **Next: Add Tags**
+8. Keep the default settings on this page and select **Next: Configure Security Group**
+9. Create a new security group and **Add Rule** of type *Custom TCP Rule*, specify *Port Range* as `8080`, and click **Next: Review and Launch**
+    
+    ![04](https://mrasto3.people.uic.edu/cs441/hw4/04.PNG)
+    
+10. Click **Launch**
+11. Create a new key pair or use an existing one. It is important to specify a key pair that is working for you, otherwise you won't be able to login to this instance
+
+    ![05](https://mrasto3.people.uic.edu/cs441/hw4/05.PNG)
+
+12. Click **Launch Instance** to let AWS spin up a new EC2 instance
+13. Now go to the **Instances** tab, wait until our instance's status becomes **running** and then clicl on **Connect**
+
+    ![06](https://mrasto3.people.uic.edu/cs441/hw4/06.PNG)
+
+14. Copy the example `ssh` command
+
+    ![07](https://mrasto3.people.uic.edu/cs441/hw4/07.PNG)
+
+15. Open an SSH client and paste that command. Remember to change the value of `-i` option which specifies the path to your private key for the key-pair you specified while creating the instance
+
+    ![08](https://mrasto3.people.uic.edu/cs441/hw4/08.PNG)
+
+16. Once logged in, install docker using the below commands
+
+    ```
+    sudo yum update -y
+    
+    sudo yum install -y docker
+    ```
+    
+17. Start the docker service
+
+    ```
+    sudo service docker start
+    ```
+    
+18. Deploy our docker container by pulling it from Docker Hub
+
+    ```
+    docker run -p 8080:8080 mayankrastogi/chessservice:0.0.1-SNAPSHOT
+    ```
+    
+19. Our Spring Boot application should have started now. Test this by using Postman again. You can either use the **Public IP** of your instance or the **Public DNS** to connect to the deployed service

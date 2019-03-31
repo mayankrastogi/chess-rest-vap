@@ -26,7 +26,7 @@ The project was developed using the following environment:
 
 #### Docker Image
 
-A docker image for this project can be pulled from my [repository on Docker Hub]():
+A docker image for this project can be pulled from my [repository on Docker Hub](https://cloud.docker.com/u/mayankrastogi/repository/docker/mayankrastogi/chessservice):
 
 ```
 docker pull mayankrastogi/chessservice:0.0.1-SNAPSHOT
@@ -41,7 +41,7 @@ docker pull mayankrastogi/chessservice:0.0.1-SNAPSHOT
 #### Running the Chess Service Locally
 
 1. Clone or download this repository
-2. Open Command Prompt (if on Windows) or Terminal (if on Linux/Mac)
+2. Open Command Prompt (if on Windows) or Terminal (if on Linux/Mac) and browse to the project directory
 3. Run the test cases and build a fat `jar` of the application using `Gradle`
     
     *On Windows:* 
@@ -62,12 +62,40 @@ docker pull mayankrastogi/chessservice:0.0.1-SNAPSHOT
     java -jar build/libs/chessservice-0.0.1-SNAPSHOT.jar
     ```
 5. Open [Postman](https://www.getpostman.com/) or any other application which lets you send `HTTP` requests
-6. Make a request to start a new game by sending a `POST` request to `localhost:8080/chess/new`. Check the API specification section below to find out the set of parameters to pass
+6. Make a request to start a new game by sending a `POST` request to `localhost:8080/chess/new`. Check the [API specification](#api-specification) section to find out the set of parameters to pass
 7. The application can be terminated by pressing the `Ctrl` + `C` hot key on the Command Prompt / Terminal
 
 #### Building the Chess Service Virtual Appliance (VAP) using OSv and Capstan
 
-// TODO
+1. Log into a Linux/Mac machine that has QEMU and KVM installed and configured
+2. Open terminal and browse to the project directory
+3. Install `capstan` if you don't have it already
+
+    ```
+    curl https://raw.githubusercontent.com/cloudius-systems/capstan/master/scripts/download | bash
+    ```
+
+4. Copy `openjdk8` base images from `osv-base-images` directory by running `install-images.sh` script. This script copies and extracts the base images in that directory to `~/.capstan/repositories/mayankrastogi/`.
+
+    ```
+    sudo osv-base-images/install-images.sh
+    ```
+    
+    If you get an error regarding `\r`, please convert the line endings in that script from `CRLF` to `LF` using your favorite text editor.
+
+5. Build the unikernal image
+
+    ```
+    sudo $HOME/bin/capstan build -v
+    ```
+  
+6. Launch the VM instance and forward port `8080` of the VM to port `8080` of the host
+
+    ```
+    sudo $HOME/bin/capstan run -f 8080:8080
+    ```
+
+7. The VM should have launched now and our Spring Boot application should have started. Test it by making a request to start a new game by sending a `POST` request to `localhost:8080/chess/new`. Check the [API specification](#api-specification) section to find out the set of parameters to pass
 
 #### Containerizing the Chess Service using Docker and publishing it on Docker Hub
 
@@ -77,7 +105,7 @@ docker pull mayankrastogi/chessservice:0.0.1-SNAPSHOT
 
 #### Deploying the OSv Virtual Appliance on AWS EC2
 
-Watch this video for details on how to build the VAP and deploy it on AWS EC2:
+Watch this [video on YouTube](https://youtu.be/lqg4FtTALQ4) for details on how to build the VAP and deploy it on AWS EC2:
 
 [![How to deploy OSv unikernal Virtual Appliance on AWS EC2](https://img.youtube.com/vi/lqg4FtTALQ4/maxresdefault.jpg)](https://youtu.be/lqg4FtTALQ4) 
 

@@ -176,7 +176,98 @@ opponentAILevel Level of AI you wish to play against (1 | 2).
 }
 ```
 
+#### Play against another instance
 
+- HTTP Method: `POST`
+- End Point: `/play`
+- Parameters:
+    
+```
+serverURL           URL of the chess service.
+serverPlayerAILevel AI level of the server player.
+playerName          The name by which this AI player should be identified.
+playerColor         The color to use for this AI player.
+playerAILevel       The AI level of this player.
+maxMoves            Maximum number of moves before the game is considered to be over. Default: 100.
+```
+
+- Sample Response:
+
+```
+{
+    "playerName": "client",
+    "playerColor": "BLACK",
+    "playerAILevel": 2,
+    "serverPlayerName": "Chess AI",
+    "serverPlayerColor": "WHITE",
+    "serverPlayerAILevel": 1,
+    "serverURL": "http://localhost:8080",
+    "outcome": {
+        "hasGameEnded": false,
+        "status": "WAITING_FOR_OPPONENT",
+        "fen": "rnbqkb1r/p1pppppp/8/1p6/5P2/3P1PPN/PPP5/RNBQKB1R b KQkq - 0 6",
+        "pgn": "[Event \"Game\"]\n[Date \"2019.3.31\"]\n[White \"Chess AI\"]\n[Black \"client\"]\n\n1. h2-h4 b7-b5 2. f2-f4 Ng8-h6 3. Ng1-h3 Nh6-f5 4. d2-d3 Nf5xh4 5. g2-g3 Nh4-f3+ 6. e2xf3 ",
+        "winner": null,
+        "moves": [
+            {
+                "fromSquare": "h2",
+                "toSquare": "h4",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "b7",
+                "toSquare": "b5",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "f2",
+                "toSquare": "f4",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "g8",
+                "toSquare": "h6",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "g1",
+                "toSquare": "h3",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "h6",
+                "toSquare": "f5",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "d2",
+                "toSquare": "d3",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "f5",
+                "toSquare": "h4",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "g2",
+                "toSquare": "g3",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "h4",
+                "toSquare": "f3",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "e2",
+                "toSquare": "f3",
+                "promotionPiece": null
+            }
+        ]
+    }
+}
+```
 
 ### Instructions
 

@@ -34,7 +34,149 @@ docker pull mayankrastogi/chessservice:0.0.1-SNAPSHOT
 
 ### API Specification
 
-// TODO
+#### Start a new game
+
+- HTTP Method: `POST`
+- End Point: `/chess/new`
+- Parameters:
+    
+```
+playerName      Your name.
+playerColor     The color you wish to play with (BLACK | WHITE).
+opponentAILevel Level of AI you wish to play against (1 | 2).
+```
+
+- Sample Response:
+
+```
+{
+    "gameID": "cc809856-dfed-4cc5-8790-59708d5829d0",
+    "clientMove": null,
+    "serverMove": {
+        "fromSquare": "d2",
+        "toSquare": "d4",
+        "promotionPiece": null
+    },
+    "status": {
+        "hasGameEnded": false,
+        "status": "WAITING_FOR_OPPONENT",
+        "fen": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1",
+        "pgn": "[Event \"Game\"]\n[Date \"2019.3.30\"]\n[White \"Chess AI\"]\n[Black \"Mayank\"]\n\n1. d2-d4 ",
+        "winner": null,
+        "moves": [
+            {
+                "fromSquare": "d2",
+                "toSquare": "d4",
+                "promotionPiece": null
+            }
+        ]
+    }
+}
+```
+
+#### Make a Move
+
+- HTTP Method: `PUT`
+- End Point: `/chess/{gameID}/new`
+- Parameters:
+    
+```
+(Path parameter) gameID:   The game on which the move is to be made.
+(Request Body)             Description of the move. The promotionPiece should be supplied when a move is made that results in a pawn reaching the opponent's end of the chess board.
+```
+    
+- Sample Request Body:
+
+```
+{
+   "fromSquare": "e7",
+   "toSquare": "e8",
+   "promotionPiece": "QUEEN"
+}
+```
+
+- Sample Response:
+
+```
+{
+    "gameID": "6e89bc43-672f-44e4-ab6f-843183b7a792",
+    "clientMove": {
+        "fromSquare": "e7",
+        "toSquare": "e6",
+        "promotionPiece": null
+    },
+    "serverMove": {
+        "fromSquare": "a2",
+        "toSquare": "a4",
+        "promotionPiece": null
+    },
+    "status": {
+        "hasGameEnded": false,
+        "status": "WAITING_FOR_OPPONENT",
+        "fen": "rnbqkbnr/pppp1ppp/4p3/8/P7/2N5/1PPPPPPP/R1BQKBNR b KQkq a3 0 2",
+        "pgn": "[Event \"Game\"]\n[Date \"2019.3.31\"]\n[White \"Chess AI\"]\n[Black \"Mayank\"]\n\n1. Nb1-c3 e7-e6 2. a2-a4 ",
+        "winner": null,
+        "moves": [
+            {
+                "fromSquare": "b1",
+                "toSquare": "c3",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "e7",
+                "toSquare": "e6",
+                "promotionPiece": null
+            },
+            {
+                "fromSquare": "a2",
+                "toSquare": "a4",
+                "promotionPiece": null
+            }
+        ]
+    }
+}
+```
+
+#### View Game Status
+
+- HTTP Method: `GET`
+- End Point: `/chess/{gameID}`
+- Parameters:
+    
+```
+(Path Parameter) gameID: The ID of the chess game whose state is to be fetched.
+```
+
+- Sample Response:
+
+```
+{
+    "hasGameEnded": false,
+    "status": "WAITING_FOR_OPPONENT",
+    "fen": "rnbqkbnr/pppp1ppp/4p3/8/P7/2N5/1PPPPPPP/R1BQKBNR b KQkq a3 0 2",
+    "pgn": "[Event \"Game\"]\n[Date \"2019.3.31\"]\n[White \"Chess AI\"]\n[Black \"Mayank\"]\n\n1. Nb1-c3 e7-e6 2. a2-a4 ",
+    "winner": null,
+    "moves": [
+        {
+            "fromSquare": "b1",
+            "toSquare": "c3",
+            "promotionPiece": null
+        },
+        {
+            "fromSquare": "e7",
+            "toSquare": "e6",
+            "promotionPiece": null
+        },
+        {
+            "fromSquare": "a2",
+            "toSquare": "a4",
+            "promotionPiece": null
+        }
+    ]
+}
+```
+
+
 
 ### Instructions
 
@@ -61,6 +203,7 @@ docker pull mayankrastogi/chessservice:0.0.1-SNAPSHOT
     ```
     java -jar build/libs/chessservice-0.0.1-SNAPSHOT.jar
     ```
+    
 5. Open [Postman](https://www.getpostman.com/) or any other application which lets you send `HTTP` requests
 6. Make a request to start a new game by sending a `POST` request to `localhost:8080/chess/new`. Check the [API specification](#api-specification) section to find out the set of parameters to pass
 7. The application can be terminated by pressing the `Ctrl` + `C` hot key on the Command Prompt / Terminal

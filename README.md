@@ -77,7 +77,7 @@ opponentAILevel Level of AI you wish to play against (1 | 2).
 #### Make a Move
 
 - HTTP Method: `PUT`
-- End Point: `/chess/{gameID}/new`
+- End Point: `/chess/{gameID}/move`
 - Parameters:
     
 ```
@@ -140,7 +140,7 @@ opponentAILevel Level of AI you wish to play against (1 | 2).
 #### View Game Status
 
 - HTTP Method: `GET`
-- End Point: `/chess/{gameID}`
+- End Point: `/chess/{gameID}/state`
 - Parameters:
     
 ```
